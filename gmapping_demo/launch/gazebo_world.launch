@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<launch>
+
+  <!-- We simulate WillowGarage in gazebo-->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="worlds/willowgarage.world"/>
+    <arg name="paused" value="true"/>
+    <arg name="use_sim_time" value="true"/>
+    <arg name="gui" value="true"/>-
+    <arg name="headless" value="false"/>
+    <arg name="recording" value="false"/>
+    <arg name="debug" value="false"/>
+  </include>
+
+  <!-- Put Pioneer3at with hokuyo sensor in our gazebo world-->
+  <include file="$(find gmapping_demo)/launch/upload_pioneer3at-Hokuyo.xml"/>
+  <!-- convert joint states to TF transforms for rviz, etc -->
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher"/>
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+
+  <node pkg="tf" type="static_transform_publisher" name="tf_Hokuyo"
+	      args="0.27 0 0.17 3.14 -1.57 0 base_link hokuyo 100" />
+
+    <!-- Open Rviz window -->
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find gmapping_demo)/launch/gmapping.rviz"/>
+
+  <!-- Open gmapping slam -->
+   <node pkg="gmapping" type="slam_gmapping" name="slam_gmapping" output="screen">
+    <remap from="scan" to="laser"/>
+    <param name="odom_frame" value="odom"/>
+  </node>
+
+
+  <node pkg="turtlebot3_teleop" type="turtlebot3_teleop_key" name="turtlebot3_teleop_keyboard"  output="screen"/>
+
+
+
+
+</launch>
